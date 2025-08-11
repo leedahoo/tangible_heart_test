@@ -1,0 +1,55 @@
+<!-- templates/question_2.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>질문 2</title>
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=5">
+  <style>
+    .q-wrap {
+      position: relative;
+      z-index: 1;             
+      max-width: 1000px;
+      margin-top: -200vh;
+      transform: translateX(7%);
+      text-align: left;
+      color: #222;
+    }
+    .q-wrap h2 { font-size: 2.5rem; margin: 0 0 16px; }
+    .q-wrap p  { font-size: 1.5rem; margin: 0 0 24px; }
+    .q-wrap button{
+      padding: 12px 20px; font-size: 1.2rem; margin: 8px 0;
+      border: none; border-radius: 8px; cursor: pointer; background: #f2f2f2;
+    }
+    .q-wrap button:hover{ background:#e6e6e6; }
+  </style>
+</head>
+<body>
+  <div class="bg-wrapper">
+    <div class="bg-fixed" style="--bg:url('{% static 'images/landing_bg.png' %}')"></div>
+  </div>
+
+  <div class="q-wrap">
+    <h2>질문 2:</h2>
+    <p>팀 프로젝트에서 당신이 선호하는 역할은?</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" name="answer" value="A">A. 방향을 정하고 이끄는 리더</button><br><br>
+      <button type="submit" name="answer" value="B">B. 사람들을 조율하고 협업을 돕는 중재자</button><br><br>
+      <button type="submit" name="answer" value="C">C. 맡은 일을 조용히 끝내는 솔로플레이어</button>
+      <!-- form 종료 직전 -->
+</form>
+
+<!-- 뒤로가기 버튼 -->
+<div style="margin-top: 20px;">
+  <a href="{% url 'question_1' %}" 
+     style="display:inline-block; padding: 10px 16px; font-size:1rem; background:#ccc; color:#000; border-radius:8px; text-decoration:none;">
+    ← 뒤로가기
+  </a>
+</div>
+    </form>
+  </div>
+</body>
+</html>

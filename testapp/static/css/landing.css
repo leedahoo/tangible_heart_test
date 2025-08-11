@@ -1,0 +1,76 @@
+:root{
+  --vh: 1vh;
+  --ink:#0d0d0d;
+  --shadow:0 20px 60px rgba(0,0,0,.12);
+}
+
+/* 고정 배경 */
+/* 세로 2배 → 더 늘리고 싶으면 240~300vh로 */
+.bg-wrapper {
+  height: 139vh; /* ← 200vh에서 240vh로 늘림 (원하는 값으로 조절) */
+  position: relative;
+}
+
+.bg-fixed {
+  position: absolute; inset: 0;
+  background-image: var(--bg);
+  background-size: auto 100%;      /* ← 가로는 자동, 세로를 래퍼 높이에 딱 맞춤 */
+  background-position: top center; /* ← 꼭대기부터 보여줌 */
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+
+
+
+html,body{height:100%;margin:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,sans-serif;
+  color:var(--ink); background:#fff;
+  scroll-behavior:smooth;
+  overflow-y:scroll;
+  scroll-snap-type:y mandatory;
+}
+
+/* 패널/안전영역(아이패드 가로 4:3) */
+.panel{
+  min-height:calc(var(--vh) * 100);
+  display:flex; align-items:center; justify-content:center;
+  scroll-snap-align:start; padding:0; background:transparent;
+}
+.safe{
+  aspect-ratio: 4 / 3;
+  height: min(calc(var(--vh) * 100), calc(100vw * 0.75));
+  width:  calc( min(calc(var(--vh) * 100), calc(100vw * 0.75)) * 1.3333 );
+  margin: 0 auto; display:flex; align-items:center; justify-content:center;
+  position:relative; padding: clamp(18px, 4vw, 40px);
+}
+
+/* 이미지 기본 스타일 */
+.block-img{
+  display:block;
+  width: min(88%, 700px);
+  height:auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  will-change: transform, opacity; /* 스크롤 성능 */
+}
+
+/* 화살표 숨김이 필요하면 */
+.scroll-hint{ display:none !important; }
+
+/* === QUESTION PAGES BG OVERRIDES === */
+.bg-wrapper {
+  height: 240vh !important;    /* 필요시 200~300vh 사이로 조절 */
+  position: relative !important;
+}
+.bg-fixed {
+  position: absolute !important;
+  inset: 0 !important;
+  background-image: var(--bg) !important;
+  background-size: 102% auto !important;   /* 세로 기준으로 꽉 채움(비율 유지) */
+  background-position: top center !important;
+  background-repeat: no-repeat !important;
+  z-index: 0 !important;                   /* ✅ 음수 대신 0으로, 컨텐츠는 z-index:1 */
+}

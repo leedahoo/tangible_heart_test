@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fairy-Bo Landing</title>
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+  <!-- 배경 영역(세로 2배) -->
+  <div class="bg-wrapper">
+    <div class="bg-fixed" style="--bg:url('{% static 'images/landing_bg.png' %}')"></div>
+  </div>
+
+  <!-- 파란 블럭 -->
+  <section class="panel transparent" id="blue">
+    <div class="safe">
+      <img
+        src="{% static 'blocks/blue_block.png' %}"
+        alt="blue block"
+        class="block-img js-block"
+        data-rotate="-10"  
+        data-opacity="0.95"  
+        data-scale="0.8"    
+        data-x="-5"         
+        data-y="-80"
+      >
+    </div>
+  </section>
+
+  <!-- 노란 블럭 -->
+  <section class="panel transparent" id="yellow">
+    <div class="safe">
+      <img
+        src="{% static 'blocks/yellow_block.png' %}"
+        alt="yellow block"
+        class="block-img js-block"
+        data-rotate="0"
+        data-opacity="0.95"
+        data-scale="0.7"
+        data-x="-30"
+        data-y="-40"
+      >
+    </div>
+  </section>
+
+  <!-- 트리거 섹션: 보이면 /q1 로 이동 -->
+  <section class="panel transparent" id="test" data-target-url="{% url 'question_1' %}">
+    <div class="safe">
+      <div class="auto-start">
+        <p class="title">테스트로 이동 중…</p>
+        <p class="sub">스크롤을 멈추면 자동으로 시작합니다</p>
+        <a class="btn-start" href="{% url 'question_1' %}">바로 시작</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // vh 보정
+    const setVh = () => {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    setVh(); window.addEventListener('resize', setVh);
+
+    // data-*로 각도/위치/사이즈/투명도 적용
+    (() => {
+      document.querySelectorAll('.js-block').forEach(el => {
+        const rot = parseFloat(el.dataset.rotate || '0');
+        const op  = Math.min(1, Math.max(0, parseFloat(el.dataset.opacity || '1')));
+        const sc  = parseFloat(el.dataset.scale || '1');
+        const tx  = parseFloat(el.dataset.x || '0'); // %
+        const ty  = parseFloat(el.dataset.y || '0'); // %
+
+        // translate는 .safe(4:3 박스) 기준으로 퍼센트 이동
+        el.style.transform = `translate(${tx}%, ${ty}%) rotate(${rot}deg) scale(${sc})`;
+        el.style.opacity   = op.toString();
+      });
+    })();
+
+    // #test 진입 시 자동 이동 (사용자 스크롤 이후)
+    (() => {
+      const test = document.getElementById('test');
+      const target = test?.dataset.targetUrl;
+      if (!test || !target) return;
+      let fired = false, userScrolled = false;
+      window.addEventListener('scroll', () => { userScrolled = true; }, { once:true });
+
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if (e.isIntersecting && e.intersectionRatio > 0.6 && userScrolled && !fired){
+            fired = true;
+            setTimeout(()=>location.assign(target), 220);
+          }
+        });
+      }, { threshold:[0.6] });
+      io.observe(test);
+    })();
+  </script>
+</body>
+</html>
