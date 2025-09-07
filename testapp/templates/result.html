@@ -2,76 +2,148 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>결과</title>
-  <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=5">
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=15" />
+
   <style>
-    /* 이미지 크기 조절 */
-    .result-img {
-      width: 500px; /* 원하는 크기 */
-      height: auto; /* 비율 유지 */
+    body { margin: 0; }
+    .result-wrap { text-align: center; margin-top: 5vh; padding: 0 12px; }
+    .btn {
+      padding: 12px 20px; font-size: 1rem; border: none; border-radius: 8px;
+      cursor: pointer; background: #f2f2f2;
+    }
+    .btn:hover { background: #e6e6e6; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+
+    .print-area {
+      width: 100%; max-width: 1000px; margin: 0 auto;
+      display: grid; place-items: center;
+    }
+    .img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
-    /* 결과 내용 래퍼 */
-    .result-wrap {
-      position: relative;
-      z-index: 1;             /* 필요시 배경 위에 오도록 */
-      max-width: 1000px;
+    .screen-only { display: block; }
+    .print-only  { display: none; }
 
-      /* 🔧 위치 조절 */
-      margin: 8vh auto 0;      /* 화면 상단에서 8vh 띄움 */
-      text-align: center;
-      color: #222;
+    /* 다시 시작 버튼: 화면 맨 아래 고정 */
+    .reset-fixed {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    .result-wrap h2 {
-      font-size: 2.5rem;
-      margin-bottom: 16px;
-    }
+    @media print {
+      @page { size: 100mm 50mm; margin: 0; }
 
-    .result-wrap p {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
+      html, body {
+        width: 100mm; height: 50mm; margin: 0;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        overflow: hidden;
+      }
 
-    .result-wrap button {
-      padding: 12px 20px;
-      font-size: 1.2rem;
-      margin: 8px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #f2f2f2;
-    }
+      /* 인쇄 미리보기(브라우저) 사용 시 UI 숨김 */
+      .result-text, .print-btn, form, .reset-fixed { display: none !important; }
 
-    .result-wrap button:hover {
-      background: #e6e6e6;
+      .print-area {
+        width: 100mm; height: 50mm; padding: 0;
+        display: grid; place-items: center;
+      }
+
+      .screen-only { display: none !important; }
+      .print-only  { display: block !important; }
+
+      .print-only.img {
+        max-width: 100mm; max-height: 50mm;
+        width: 100mm; height: 50mm;
+        object-fit: contain;
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ 결과 내용 -->
   <div class="result-wrap">
-    <h2>당신의 결과 유형은:</h2>
+    <!-- 텍스트 -->
+    <h2 class="result-text">당신의 결과 유형은:</h2>
+    <p class="result-text"><strong>{{ result_type }}</strong></p>
 
-    {% if result_type == "unknown" %}
-      <p>죄송합니다. 결과를 찾을 수 없습니다.</p>
-    {% else %}
-      <p><strong>{{ result_type }}</strong></p>
-      <img src="{% static 'characters/'|add:result_type|add:'.png' %}" 
-           alt="캐릭터 이미지" 
-           class="result-img">
-      <br><br>
-      <button onclick="window.print()">결과 이미지 출력하기</button>
-    {% endif %}
+    <!-- 출력 버튼 (텍스트 바로 아래) -->
+    <div class="print-btn" style="margin: 10px 0 18px;">
+      <button class="btn" id="btn-direct-print">라벨기로 바로 출력</button>
+      <!-- 필요하면 브라우저 인쇄도 보조로 -->
+      <!-- <button class="btn" onclick="window.print()">브라우저 인쇄</button> -->
+    </div>
 
-    <!-- 다시 시작하기 -->
-    <form method="post" action="{% url 'reset' %}" style="margin-top:16px;">
-      {% csrf_token %}
-      <button type="submit">다시 시작하기</button>
-    </form>
+    <!-- 이미지 영역 -->
+    <div class="print-area">
+      <!-- 화면용 -->
+      <img
+        src="{% static img_path %}"
+        alt="캐릭터 이미지(화면용)"
+        class="img screen-only"
+        onerror="this.onerror=null;this.src='{% static 'characters/_placeholder.png' %}';"
+      />
+
+      <!-- 인쇄용 -->
+      <img
+        src="{% static print_path %}"
+        alt="캐릭터 이미지(인쇄용)"
+        class="img print-only"
+        onerror="this.onerror=null;this.src='{% static 'characters/_placeholder.png' %}';"
+      />
+    </div>
   </div>
+
+  <!-- 다시 시작 -->
+  <form method="post" action="{% url 'reset' %}" class="reset-fixed">
+    {% csrf_token %}
+    <button class="btn" type="submit">다시 시작하기</button>
+  </form>
+
+  <script>
+    // CSRF 토큰 (Django)
+    function getCookie(name) {
+      const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return m ? m.pop() : '';
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // 라벨기로 바로 출력
+    const btn = document.getElementById('btn-direct-print');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = '출력 중...';
+      try {
+        const imgRel = "{{ print_path }}"; // 예: "characters/type_01_result.png"
+        const form = new FormData();
+        form.append('img_rel', imgRel);
+
+        const res = await fetch("{% url 'api_print' %}", {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken },
+          body: form
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '인쇄 실패');
+        alert(data.message || '인쇄 요청 완료');
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '라벨기로 바로 출력';
+      }
+    });
+  </script>
 
 </body>
 </html>

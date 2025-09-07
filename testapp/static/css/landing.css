@@ -11,13 +11,26 @@
   position: relative;
 }
 
+/* 배경은 클릭/터치 이벤트를 받지 않게 */
 .bg-fixed {
   position: absolute; inset: 0;
   background-image: var(--bg);
-  background-size: auto 100%;      /* ← 가로는 자동, 세로를 래퍼 높이에 딱 맞춤 */
-  background-position: top center; /* ← 꼭대기부터 보여줌 */
-  background-repeat: no-repeat;
-  z-index: -1;
+  background-size: 102% auto !important;
+  background-position: top center !important;
+  background-repeat: no-repeat !important;
+  z-index: 0 !important;
+  pointer-events: none !important;   /* ✅ 이 줄 추가 */
+}a
+
+
+/* 버튼 레이어: 항상 최상단 + 클릭 가능 */
+.reset-wrap{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:9999;   /* 이미 추가했으니 유지 */
 }
 
 
@@ -74,3 +87,4 @@ body{
   background-repeat: no-repeat !important;
   z-index: 0 !important;                   /* ✅ 음수 대신 0으로, 컨텐츠는 z-index:1 */
 }
+

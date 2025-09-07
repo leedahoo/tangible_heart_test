@@ -1,5 +1,4 @@
 # testapp/urls.py
-
 from django.urls import path
 from . import views
 
@@ -11,6 +10,7 @@ urlpatterns = [
     path('q4/', views.question_4, name='question_4'),
     path('q5/', views.question_5, name='question_5'),
     path('q6/', views.question_6, name='question_6'),
-    path('result/', views.result, name='result'), 
+    path('result/', views.result, name='result'),
     path('reset/', views.reset, name='reset'),
+    path('api/print/', views.api_print, name='api_print'),
 ]
